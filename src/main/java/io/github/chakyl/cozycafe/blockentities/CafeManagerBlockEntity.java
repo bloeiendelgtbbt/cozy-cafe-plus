@@ -53,7 +53,7 @@ public class CafeManagerBlockEntity extends BlockEntity implements MenuProvider 
     private static final int MAX_GROUP_SIZE = 4;
 
     private boolean open = false;
-    private String cafeName = "Кафе";
+    private String cafeName = "Cafe";
     private final List<CafeMenuEntry> menu = new ArrayList<>();
     /** The item guests pay with. Empty until the owner picks one; the cafe can't open or edit its menu without it. */
     private ItemStack currency = ItemStack.EMPTY;
@@ -368,7 +368,7 @@ public class CafeManagerBlockEntity extends BlockEntity implements MenuProvider 
     public void clearCafeData() {
         if (this.level == null || this.level.isClientSide) return;
         this.setOpen(false, true);
-        this.cafeName = "Кафе";
+        this.cafeName = "Cafe";
         this.menu.clear();
         this.currency = ItemStack.EMPTY;
         this.markUpdated();

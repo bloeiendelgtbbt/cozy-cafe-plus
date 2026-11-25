@@ -25,7 +25,7 @@ Changed and added in Cozy Cafe+ (by bloeiende)
   payment and a 1-5 star rating, unpaid meals becoming debts.
 - NPC guests walk like villagers, open the cafe's doors, order and pay.
 - Shift report for the owner, the OPEN / CLOSED sign, waypoints for Xaero's
-  Minimap, the GUI reworked, Russian text.
+  Minimap, the GUI reworked, English and Russian text.
 - GameTests covering the cafe's rules.
 
 Dependencies (not included in the jar)

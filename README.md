@@ -2,11 +2,11 @@
 
 Fabric-форк мода [Cozy Cafe](https://github.com/Chakyl/Cozy-Cafe) (Nitbe и Chakyl) с упором на мультиплеер:
 своё заведение на сервере, официанты, гости-игроки и НПС, меню с ценами, счёт, оценки и долги.
-Симулятор работы из реальной жизни.
+Симулятор работы из реальной жизни. Английский и русский языки.
 
 *A Fabric fork of [Cozy Cafe](https://github.com/Chakyl/Cozy-Cafe) by Nitbe and Chakyl, built for multiplayer:
 run a cafe on a server with waiters, player and NPC guests, a priced menu, bills, ratings and debts.
-The in-game text is Russian for now.*
+In English and Russian.*
 
 ## Возможности
 
