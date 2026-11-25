@@ -28,6 +28,11 @@ Changed and added in Cozy Cafe+ (by bloeiende)
   Minimap, the GUI reworked, English and Russian text.
 - GameTests covering the cafe's rules.
 
+How it was made
+---------------
+Developed by bloeiende with AI assistance (Claude). Game design, testing and
+direction by bloeiende; most of the code was written with the AI.
+
 Dependencies (not included in the jar)
 --------------------------------------
 - Fabric API

@@ -37,6 +37,14 @@ In English and Russian.*
 
 Зависимости скачиваются из Modrinth Maven, Ladysnake Maven и Maven Central.
 
+## Как сделан мод
+
+Мод разработан bloeiende с помощью ИИ (Claude): идея, игровые правила, решения по механикам и тестирование — bloeiende,
+большая часть кода написана с ИИ. Основан на Cozy Cafe от Nitbe и Chakyl.
+
+*Developed by bloeiende with AI assistance (Claude). Game design, testing and direction by bloeiende.
+Based on Cozy Cafe by Nitbe and Chakyl.*
+
 ## Лицензия
 
 GPL-3.0, как и у оригинала (см. [LICENSE.txt](LICENSE.txt)). Что взято из оригинала и что изменено — в [CREDITS.txt](CREDITS.txt).
