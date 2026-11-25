@@ -295,6 +295,7 @@ public class CafeManagerBlockEntity extends BlockEntity implements MenuProvider 
 
     /** The first opening of a cafe is told to everyone on the server. */
     private void announceNewCafe(ServerLevel level) {
+        io.github.chakyl.cozycafe.data.CafeNews.cafeOpened(level.getServer(), this.cafeId, this.owner);
         BlockPos pos = this.worldPosition;
         net.minecraft.network.chat.MutableComponent where = Component.literal(pos.getX() + " " + pos.getY() + " " + pos.getZ()).withStyle(net.minecraft.ChatFormatting.GOLD);
         if (level.dimension() != Level.OVERWORLD) where.append(Component.literal(" (" + level.dimension().location().getPath() + ")").withStyle(net.minecraft.ChatFormatting.GRAY));

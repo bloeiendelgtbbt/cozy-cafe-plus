@@ -1,5 +1,6 @@
 package io.github.chakyl.cozycafe.test;
 
+import net.minecraft.network.chat.Component;
 import dev.slarrties.privit.common.region.rule.Rule;
 import dev.slarrties.privit.server.region.Region;
 import dev.slarrties.privit.server.region.protection.RegionPermissionChecker;
@@ -413,5 +414,37 @@ public class Stage5GameTests implements FabricGameTest {
         ((net.minecraft.world.level.storage.ServerLevelData) level.getLevelData()).setGameTime(gameTime + (20 - gameTime % 20) % 20);
         cafe.tick(level, cafe.getBlockPos(), cafe.getBlockState());
         ((net.minecraft.world.level.storage.ServerLevelData) level.getLevelData()).setGameTime(gameTime);
+    }
+
+    /** A joining player hears about cafes that opened while they were away; a first-time player gets them all. */
+    @GameTest(template = EMPTY_STRUCTURE)
+    public void missedCafesOnJoin(GameTestHelper helper) throws InterruptedException {
+        net.minecraft.server.MinecraftServer server = helper.getLevel().getServer();
+        io.github.chakyl.cozycafe.data.CafeNews news = io.github.chakyl.cozycafe.data.CafeNews.get(server);
+        java.util.UUID me = java.util.UUID.randomUUID();
+        java.util.UUID other = java.util.UUID.randomUUID();
+        java.util.UUID oldCafe = java.util.UUID.randomUUID(), newCafe = java.util.UUID.randomUUID(), myCafe = java.util.UUID.randomUUID();
+        net.minecraft.resources.ResourceLocation overworld = net.minecraft.world.level.Level.OVERWORLD.location();
+        io.github.chakyl.cozycafe.data.CafeDirectory.Entry old = new io.github.chakyl.cozycafe.data.CafeDirectory.Entry(oldCafe, overworld, new BlockPos(1, 64, 1), "Old Cafe", 4, true);
+        io.github.chakyl.cozycafe.data.CafeDirectory.Entry fresh = new io.github.chakyl.cozycafe.data.CafeDirectory.Entry(newCafe, overworld, new BlockPos(2, 64, 2), "New Cafe", -1, true);
+        io.github.chakyl.cozycafe.data.CafeDirectory.Entry mine = new io.github.chakyl.cozycafe.data.CafeDirectory.Entry(myCafe, overworld, new BlockPos(3, 64, 3), "My Cafe", -1, true);
+        io.github.chakyl.cozycafe.data.CafeNews.cafeOpened(server, oldCafe, other);
+        java.util.List<io.github.chakyl.cozycafe.data.CafeDirectory.Entry> before = java.util.List.of(old);
+        Component first = news.missedCafes(me, before);
+        helper.assertTrue(first != null && first.getString().contains("Old Cafe"), "a first-time player gets every cafe");
+
+        Thread.sleep(3);
+        io.github.chakyl.cozycafe.data.CafeNews.playerLeft(server, me);
+        helper.assertTrue(news.missedCafes(me, before) == null, "nothing new since leaving");
+        Thread.sleep(3);
+        io.github.chakyl.cozycafe.data.CafeNews.cafeOpened(server, newCafe, other);
+        io.github.chakyl.cozycafe.data.CafeNews.cafeOpened(server, myCafe, me);
+        Component missed = news.missedCafes(me, java.util.List.of(old, fresh, mine));
+        helper.assertTrue(missed != null, "a cafe opened while away is listed");
+        String text = missed.getString();
+        helper.assertTrue(text.contains("New Cafe") && !text.contains("Old Cafe") && !text.contains("My Cafe"),
+                "only the new cafe of someone else, got: " + text);
+        helper.assertTrue(text.contains("2 64 2"), "with its coordinates");
+        helper.succeed();
     }
 }

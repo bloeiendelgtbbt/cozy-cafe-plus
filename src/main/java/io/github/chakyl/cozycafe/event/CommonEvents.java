@@ -59,8 +59,12 @@ public class CommonEvents {
             RoleTracker.sendTo(handler.getPlayer());
             io.github.chakyl.cozycafe.data.CafeDirectory.get(server).sendTo(handler.getPlayer());
             io.github.chakyl.cozycafe.data.CafeReports.get(server).sendPending(handler.getPlayer());
+            io.github.chakyl.cozycafe.data.CafeNews.playerJoined(handler.getPlayer());
         });
-        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> ApronRules.forget(handler.getPlayer().getUUID()));
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            ApronRules.forget(handler.getPlayer().getUUID());
+            io.github.chakyl.cozycafe.data.CafeNews.playerLeft(server, handler.getPlayer().getUUID());
+        });
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> RoleTracker.reset());
         // Waiters may also serve a seated player guest, or give them the bill, by right-clicking the guest.
         UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {

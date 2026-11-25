@@ -217,5 +217,8 @@
   "gui.cozyrestaurant.status.bill": "The bill is on the table: pay it (right-click the table).",
   "gui.cozyrestaurant.status.cancel_tooltip": "Cancel the order, no strings attached",
   "gui.cozyrestaurant.status.cancel_rest_tooltip": "Only what hasn't been served is cancelled. What was served has to be paid for.",
-  "message.cozyrestaurant.bill.npc_nothing": "The customer paid nothing: NPCs only pay for food"
+  "message.cozyrestaurant.bill.npc_nothing": "The customer paid nothing: NPCs only pay for food",
+  "message.cozyrestaurant.cafe.missed": "☕ New cafes opened while you were away:",
+  "message.cozyrestaurant.cafe.all_cafes": "☕ Cafes on this server — come visit:",
+  "message.cozyrestaurant.cafe.and_more": "…and %s more"
 }
