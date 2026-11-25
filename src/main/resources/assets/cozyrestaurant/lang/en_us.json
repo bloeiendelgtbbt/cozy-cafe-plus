@@ -219,5 +219,6 @@
   "gui.cozyrestaurant.status.bill_wait_hint": "If it doesn't come in time, the meal is on the house.",
   "gui.cozyrestaurant.status.bill": "The bill is on the table: pay it (right-click the table).",
   "gui.cozyrestaurant.status.cancel_tooltip": "Cancel the order, no strings attached",
-  "gui.cozyrestaurant.status.cancel_rest_tooltip": "Only what hasn't been served is cancelled. What was served has to be paid for."
+  "gui.cozyrestaurant.status.cancel_rest_tooltip": "Only what hasn't been served is cancelled. What was served has to be paid for.",
+  "message.cozyrestaurant.bill.npc_nothing": "The customer paid nothing: NPCs only pay for food"
 }

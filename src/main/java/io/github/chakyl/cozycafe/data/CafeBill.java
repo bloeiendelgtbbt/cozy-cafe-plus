@@ -18,7 +18,7 @@ import java.util.UUID;
 /**
  * A bill lying on a cafe table. It lists what was ordered and what it costs; the guest puts the payment into its
  * five slots (like a small chest) and rates the cafe. The bill counts as paid once it holds at least the sum in the
- * cafe's currency and (for a player guest) a rating was chosen. NPC guests pay one netherite scrap and never rate.
+ * cafe's currency and (for a player guest) a rating was chosen. NPC guests pay at once, by how filling the food was, and never rate.
  */
 public class CafeBill {
     public static final int SLOTS = 5;
@@ -65,13 +65,20 @@ public class CafeBill {
         return bill;
     }
 
-    /** The bill for an NPC: one netherite scrap, put in at once. */
-    public static CafeBill forNpc(List<ItemStack> eaten) {
+    /**
+     * The bill for an NPC, paid at once: {@code amount} of {@code currency} (from how filling the food was; may be 0).
+     */
+    public static CafeBill forNpc(List<ItemStack> eaten, ItemStack currency, int amount) {
         CafeBill bill = new CafeBill();
         for (ItemStack item : eaten) bill.lines.add(new CafeMenuEntry(item.copyWithCount(1), 0));
-        bill.currency = new ItemStack(Items.NETHERITE_SCRAP);
-        bill.sum = 1;
-        bill.payment.setItem(0, new ItemStack(Items.NETHERITE_SCRAP));
+        bill.currency = currency.copyWithCount(1);
+        int left = Math.min(amount, SLOTS * currency.getMaxStackSize());
+        bill.sum = left;
+        for (int slot = 0; slot < SLOTS && left > 0; slot++) {
+            int count = Math.min(left, currency.getMaxStackSize());
+            bill.payment.setItem(slot, currency.copyWithCount(count));
+            left -= count;
+        }
         return bill;
     }
 

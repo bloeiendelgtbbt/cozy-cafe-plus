@@ -370,4 +370,27 @@ public class Stage5GameTests implements FabricGameTest {
             });
         });
     }
+
+    /** NPCs come only by day and only while the owner (or a waiter in an apron) is inside the claim. */
+    @GameTest(template = EMPTY_STRUCTURE, batch = "npcsComeByDayWithStaff")
+    public void npcsComeByDayWithStaff(GameTestHelper helper) {
+        ServerPlayer owner = survivalPlayer(helper);
+        Region region = TestClaims.create(helper, MANAGER, 6, owner);
+        CafeManagerBlockEntity cafe = openCafe(helper, owner);
+        net.minecraft.server.level.ServerLevel level = helper.getLevel();
+        long dayTime = level.getDayTime();
+        BlockPos inside = helper.absolutePos(TABLE);
+        owner.teleportTo(inside.getX() + 0.5, inside.getY(), inside.getZ() + 0.5);
+        level.setDayTime(6000);
+        helper.assertTrue(cafe.npcsMayCome(level), "noon, owner inside: NPCs come");
+        level.setDayTime(18000);
+        helper.assertTrue(!cafe.npcsMayCome(level), "midnight: nobody comes");
+        level.setDayTime(6000);
+        BlockPos far = inside.offset(40, 0, 0);
+        owner.teleportTo(far.getX() + 0.5, far.getY(), far.getZ() + 0.5);
+        helper.assertTrue(!cafe.npcsMayCome(level), "nobody works here: nobody comes");
+        level.setDayTime(dayTime);
+        helper.assertTrue(cafe.getSpawnIntervalTicks() == 4 * 1200L, "5 stars: a visit every 4 minutes");
+        finish(helper, cafe, region, owner);
+    }
 }

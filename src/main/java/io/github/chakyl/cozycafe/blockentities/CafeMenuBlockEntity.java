@@ -1,5 +1,13 @@
 package io.github.chakyl.cozycafe.blockentities;
 
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.block.CakeBlock;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Item;
+import net.minecraft.resources.ResourceLocation;
 import com.mojang.authlib.GameProfile;
 import io.github.chakyl.cozycafe.CozyCafe;
 import io.github.chakyl.cozycafe.blocks.CafeMenuBlock;
@@ -737,8 +745,8 @@ public class CafeMenuBlockEntity extends BlockEntity {
         if (!player.isCreative()) blank.shrink(1);
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
         if (this.guestPlayer == null) {
-            // An NPC pays its one netherite scrap at once and leaves; the bill waits on the table.
-            this.bill = CafeBill.forNpc(this.eating);
+            // An NPC pays at once, by how filling the food was, and leaves; the bill waits on the table.
+            this.bill = CafeBill.forNpc(this.eating, npcCurrency(), npcPayment(this.eating, this.level.random));
             this.attachBillListener();
             this.countPayment();
             this.sendCustomerHome();
@@ -791,7 +799,9 @@ public class CafeMenuBlockEntity extends BlockEntity {
         if (this.bill.isPaid()) {
             ItemStack earnings = this.bill.takeEarnings(tips);
             if (this.bill.isDebt() && !earnings.isEmpty()) cafe.payDebt(this.bill.getGuest(), earnings, earnings.getCount());
-            if (earnings.isEmpty()) {
+            if (earnings.isEmpty() && this.bill.isNpc()) {
+                player.displayClientMessage(Component.translatable("message.cozyrestaurant.bill.npc_nothing").withStyle(ChatFormatting.YELLOW), true);
+            } else if (earnings.isEmpty()) {
                 player.displayClientMessage(Component.translatable("message.cozyrestaurant.bill.abandoned").withStyle(ChatFormatting.YELLOW), true);
             } else {
                 ItemStack collected = BillItem.collected(CozyRegistry.ItemRegistry.BILL.get().getDefaultInstance(), this.level,
@@ -858,6 +868,34 @@ public class CafeMenuBlockEntity extends BlockEntity {
     }
 
     /** A bill that got paid (or closed with what was paid) goes into the shift report once. */
+    /** What NPCs pay with (config), netherite scrap if the id is unknown. */
+    public static ItemStack npcCurrency() {
+        ResourceLocation id = ResourceLocation.tryParse(CozyCafe.CONFIG.npcPaymentItem.get());
+        Item item = id == null ? Items.AIR : BuiltInRegistries.ITEM.get(id);
+        return new ItemStack(item == Items.AIR ? Items.NETHERITE_SCRAP : item);
+    }
+
+    /** How filling an item is: hunger + saturation it restores. Cake counts all its slices; non-food is 0. */
+    public static double foodPoints(ItemStack stack) {
+        FoodProperties food = stack.getItem().getFoodProperties();
+        if (food != null) return food.getNutrition() + food.getNutrition() * food.getSaturationModifier() * 2.0;
+        if (stack.getItem() instanceof BlockItem blockItem && blockItem.getBlock() instanceof CakeBlock) {
+            // 7 slices of 2 hunger, saturation modifier 0.1.
+            return 7 * (2 + 2 * 0.1 * 2.0);
+        }
+        return 0;
+    }
+
+    /** One payment item per full {@code npc_food_points_per_payment} points; the rest is the chance of one more. */
+    public static int npcPayment(List<ItemStack> eaten, RandomSource random) {
+        double points = 0;
+        for (ItemStack stack : eaten) points += foodPoints(stack);
+        double per = CozyCafe.CONFIG.npcFoodPointsPerPayment.get();
+        int whole = (int) Math.floor(points / per);
+        double rest = points / per - whole;
+        return whole + (random.nextDouble() < rest ? 1 : 0);
+    }
+
     private void countPayment() {
         if (this.bill == null || this.bill.isCounted() || !(this.level instanceof ServerLevel)) return;
         if (!this.bill.isPaid() && !this.bill.isClosed()) return;

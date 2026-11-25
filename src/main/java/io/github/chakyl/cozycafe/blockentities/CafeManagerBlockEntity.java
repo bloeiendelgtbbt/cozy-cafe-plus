@@ -50,7 +50,19 @@ public class CafeManagerBlockEntity extends BlockEntity implements MenuProvider 
     /** A bill has this many payment slots, so one position never costs more than that many full stacks. */
     public static final int BILL_SLOTS = 5;
     public static final int MAX_WAITERS = 32;
-    private static final int MAX_GROUP_SIZE = 4;
+    private static final int MAX_GROUP_SIZE = 2;
+    /**
+     * NPC visits by the cafe's stars (index = stars; 0 counts as 1), fixed on purpose: minutes between visits,
+     * the random spread around that (in percent) and the chance a second guest comes along.
+     */
+    private static final int[] VISIT_MINUTES = {14, 14, 13, 10, 6, 4};
+    private static final int[] VISIT_SPREAD_PERCENT = {0, 0, 5, 10, 30, 75};
+    private static final int[] SECOND_GUEST_PERCENT = {5, 5, 10, 20, 60, 90};
+    /** NPCs come between 7:00 and 21:00 (day time 0 is 6:00). */
+    private static final long DAY_OPENS = 1000L;
+    private static final long DAY_CLOSES = 15000L;
+    /** When the next NPC visit is due; -1 = not planned yet (planned on the next tick). */
+    private long nextVisitAt = -1;
 
     private boolean open = false;
     private String cafeName = "Cafe";
@@ -97,14 +109,48 @@ public class CafeManagerBlockEntity extends BlockEntity implements MenuProvider 
             this.setOpen(false, true);
             return;
         }
-        if (this.npcCustomers && level.getGameTime() % this.getSpawnIntervalTicks() == 0) {
+        if (!this.npcCustomers) return;
+        long now = level.getGameTime();
+        if (this.nextVisitAt < 0) this.nextVisitAt = now + this.rollVisitDelay(level.random);
+        // A due visit waits for daytime and for someone to work here, then comes at once.
+        if (now >= this.nextVisitAt && now % 20 == 0 && this.npcsMayCome(serverLevel)) {
             this.assignCustomers(serverLevel);
+            this.nextVisitAt = now + this.rollVisitDelay(level.random);
         }
     }
 
-    /** Seconds between NPC groups: the configured interval at 5 stars, one more interval for every missing star. */
+    /** Stars as the visit tables see them: a cafe below 1 star counts as 1. */
+    private int visitStars() {
+        return Math.max(1, this.getStars());
+    }
+
+    /** Ticks between NPC visits at the cafe's current stars, before the random spread. */
     public long getSpawnIntervalTicks() {
-        return 20L * CozyCafe.CONFIG.customerSpawnInterval.get() * (1 + (5 - this.getStars()));
+        return VISIT_MINUTES[this.visitStars()] * 1200L;
+    }
+
+    private long rollVisitDelay(net.minecraft.util.RandomSource random) {
+        double spread = VISIT_SPREAD_PERCENT[this.visitStars()] / 100.0;
+        double factor = 1.0 + spread * (random.nextDouble() * 2.0 - 1.0);
+        return Math.max(20L, Math.round(this.getSpawnIntervalTicks() * factor));
+    }
+
+    /** NPCs come only by day, and only while the owner or a waiter in an apron is inside the cafe's claim. */
+    public boolean npcsMayCome(ServerLevel level) {
+        long time = level.getDayTime() % 24000L;
+        if (time < DAY_OPENS || time >= DAY_CLOSES) return false;
+        return this.staffOnSite(level);
+    }
+
+    public boolean staffOnSite(ServerLevel level) {
+        Optional<PrivitCompat.ClaimInfo> claim = CafeLookup.claimOf(this);
+        if (claim.isEmpty()) return false;
+        for (ServerPlayer player : level.players()) {
+            if (player.isSpectator() || !claim.get().bounds().isInside(player.blockPosition())) continue;
+            if (this.isOwner(player.getUUID())) return true;
+            if (this.isWaiter(player.getUUID()) && io.github.chakyl.cozycafe.util.ApronRules.isDressedAsWaiter(player)) return true;
+        }
+        return false;
     }
 
     public void assignCustomers(ServerLevel level) {
@@ -121,7 +167,7 @@ public class CafeManagerBlockEntity extends BlockEntity implements MenuProvider 
         for (CafeMenuBlockEntity table : tables) {
             table.startVisit(this.worldPosition, this.rollCustomerSkin(), spawn);
             spawned++;
-            if (spawned >= MAX_GROUP_SIZE || level.random.nextFloat() >= CozyCafe.CONFIG.groupCustomerChance.get()) break;
+            if (spawned >= MAX_GROUP_SIZE || level.random.nextInt(100) >= SECOND_GUEST_PERCENT[this.visitStars()]) break;
         }
     }
 
@@ -197,7 +243,10 @@ public class CafeManagerBlockEntity extends BlockEntity implements MenuProvider 
     public void setOpen(boolean open, boolean sendCustomersHome) {
         boolean wasOpen = this.open;
         this.open = open;
-        if (open && !wasOpen) this.shift.reset();
+        if (open && !wasOpen) {
+            this.shift.reset();
+            this.nextVisitAt = -1;
+        }
         boolean firstOpening = open && !this.everOpened && this.level instanceof ServerLevel;
         if (firstOpening) this.everOpened = true;
         this.markUpdated();

@@ -261,6 +261,9 @@ public class Stage3GameTests implements FabricGameTest {
         int ratings = cafe.getRatingCount();
         table.startVisit(cafe.getBlockPos(), "MHF_Steve", null);
         for (int i = 0; i < 400 && !table.hasOrder(); i++) tick(helper, table, 1);
+        double points = 0;
+        for (ItemStack dish : table.getOrder()) points += CafeMenuBlockEntity.foodPoints(dish);
+        int least = (int) Math.floor(points / 40.0);
         dress(owner);
         owner.setItemInHand(InteractionHand.MAIN_HAND, ServingPlateItem.withItems(new ItemStack(CozyRegistry.ItemRegistry.SERVING_PLATE.get()), table.getOrder()));
         table.handleServe(owner, owner.getMainHandItem());
@@ -272,7 +275,9 @@ public class Stage3GameTests implements FabricGameTest {
         CafeMenuBlock.handleClick(table, owner, owner.getMainHandItem());
         CafeBill bill = table.getBill();
         helper.assertTrue(bill != null && bill.isNpc() && bill.isPaid(), "the NPC pays at once: green");
-        helper.assertTrue(bill.currencyPaid() == 1 && bill.getCurrency().is(Items.NETHERITE_SCRAP), "one netherite scrap");
+        int paid = bill.currencyPaid();
+        helper.assertTrue(bill.getCurrency().is(Items.NETHERITE_SCRAP) && (paid == least || paid == least + 1),
+                "netherite scrap by how filling the food was: " + points + " points, paid " + paid);
         helper.assertTrue(!table.getHasCustomer(), "and leaves");
         helper.assertTrue(!table.canReceiveNewCustomer(), "no new guest while the bill lies on the table");
 
@@ -280,13 +285,39 @@ public class Stage3GameTests implements FabricGameTest {
         dress(owner);
         CafeMenuBlock.handleClick(table, owner, ItemStack.EMPTY);
         ItemStack collected = findCollectedBill(owner);
-        helper.assertTrue(!collected.isEmpty() && table.canReceiveNewCustomer(), "bill picked up, table free");
-        helper.assertTrue(cafe.cashBill(owner, collected), "cashed");
-        helper.assertTrue(cafe.getRevenue().countOf(new ItemStack(Items.NETHERITE_SCRAP)) == 1, "1 scrap in the cash register");
+        helper.assertTrue(table.canReceiveNewCustomer(), "bill picked up, table free");
+        if (paid > 0) {
+            helper.assertTrue(!collected.isEmpty() && cafe.cashBill(owner, collected), "cashed");
+            helper.assertTrue(cafe.getRevenue().countOf(new ItemStack(Items.NETHERITE_SCRAP)) == paid, paid + " scrap in the cash register");
+        } else {
+            helper.assertTrue(collected.isEmpty(), "nothing paid, nothing to cash");
+        }
         helper.assertTrue(cafe.getRatingCount() == ratings, "NPCs never rate");
 
         cafe.setOpen(false, true);
         TestClaims.delete(helper, region, owner);
+        helper.succeed();
+    }
+
+    /** NPCs pay by how filling the food is: 40 points a scrap, the rest a chance; non-food pays nothing. */
+    @GameTest(template = EMPTY_STRUCTURE)
+    public void npcPaysByFoodPoints(GameTestHelper helper) {
+        net.minecraft.util.RandomSource random = net.minecraft.util.RandomSource.create(1);
+        List<ItemStack> grass = List.of(new ItemStack(Items.GRASS), new ItemStack(Items.DIRT), new ItemStack(Items.DIAMOND));
+        for (int i = 0; i < 50; i++) helper.assertTrue(CafeMenuBlockEntity.npcPayment(grass, random) == 0, "non-food pays nothing");
+        List<ItemStack> dinner = List.of(new ItemStack(Items.COOKED_BEEF), new ItemStack(Items.COOKED_BEEF), new ItemStack(Items.BREAD));
+        double points = 0;
+        for (ItemStack dish : dinner) points += CafeMenuBlockEntity.foodPoints(dish);
+        helper.assertTrue(Math.abs(points - 52.6) < 0.01, "steak 20.8 + steak 20.8 + bread 11 = 52.6, got " + points);
+        int ones = 0, twos = 0;
+        for (int i = 0; i < 2000; i++) {
+            int pay = CafeMenuBlockEntity.npcPayment(dinner, random);
+            helper.assertTrue(pay == 1 || pay == 2, "52.6 points: 1 scrap, maybe 2");
+            if (pay == 1) ones++; else twos++;
+        }
+        double share = twos / 2000.0;
+        helper.assertTrue(share > 0.25 && share < 0.38, "the second scrap comes about 31% of the time, got " + share);
+        helper.assertTrue(CafeMenuBlockEntity.foodPoints(new ItemStack(Items.CAKE)) > 16, "a whole cake counts all its slices");
         helper.succeed();
     }
 

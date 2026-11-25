@@ -172,8 +172,8 @@ public class CozyConfig {
 
     private final List<ConfigValue<?>> values = new ArrayList<>();
 
-    public final IntValue customerSpawnInterval;
-    public final DoubleValue groupCustomerChance;
+    public final StringValue npcPaymentItem;
+    public final IntValue npcFoodPointsPerPayment;
     public final IntValue customerWaitTime;
     public final IntValue customerWaitTimePerExtraItem;
     public final IntValue customerOrderTime;
@@ -184,8 +184,8 @@ public class CozyConfig {
     public final StringListValue customerUsernames;
 
     private CozyConfig() {
-        customerSpawnInterval = add(new IntValue("customer_spawn_interval", "Seconds between groups of NPC customers in a 5-star cafe. Every missing star of the cafe's rating adds this interval once more (5 stars: x1, 4 stars: x2 ... 0 stars: x6).", 40, 4, 4096));
-        groupCustomerChance = add(new DoubleValue("group_customer_chance", "Chance another NPC joins the group that is coming in. Repeats until a roll fails or 4 customers are coming.", 0.5D, 0D, 1D));
+        npcPaymentItem = add(new StringValue("npc_payment_item", "What NPC customers pay with (item id).", "minecraft:netherite_scrap"));
+        npcFoodPointsPerPayment = add(new IntValue("npc_food_points_per_payment", "NPC customers pay by how filling the served food is: hunger + saturation of every dish (bread 11, steak ~21). Each full amount of this many points pays one item; the rest is the chance of one more. Things that are not food pay nothing.", 40, 1, 100000));
         customerWaitTime = add(new IntValue("customer_wait_time", "How long an NPC customer waits for a one-position order, in ticks (20 ticks = 1 second).", 1800, 20, Integer.MAX_VALUE));
         customerWaitTimePerExtraItem = add(new IntValue("customer_wait_time_per_extra_item", "Extra waiting time for every further position of an NPC order, in ticks.", 600, 0, Integer.MAX_VALUE));
         customerOrderTime = add(new IntValue("customer_order_time", "How long an NPC customer takes to choose an order, in ticks.", 200, 20, Integer.MAX_VALUE));

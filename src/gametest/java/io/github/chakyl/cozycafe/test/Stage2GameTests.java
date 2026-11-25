@@ -89,8 +89,7 @@ public class Stage2GameTests implements FabricGameTest {
         cafe.addRating(0);
         cafe.addRating(1);
         helper.assertTrue(cafe.getStars() == 2, "average 1.5 rounds to 2 stars, got " + cafe.getStars());
-        long fiveStarInterval = 20L * 40;
-        helper.assertTrue(cafe.getSpawnIntervalTicks() == fiveStarInterval * 4, "every missing star slows NPCs down, got " + cafe.getSpawnIntervalTicks());
+        helper.assertTrue(cafe.getSpawnIntervalTicks() == 13 * 1200L, "2 stars: an NPC visit every 13 minutes, got " + cafe.getSpawnIntervalTicks());
         helper.succeed();
     }
 

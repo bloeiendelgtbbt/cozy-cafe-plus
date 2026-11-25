@@ -219,5 +219,6 @@
   "gui.cozyrestaurant.status.bill_wait_hint": "Не принесут вовремя — заказ за счёт заведения.",
   "gui.cozyrestaurant.status.bill": "Счёт на столе — оплатите его (ПКМ по столу).",
   "gui.cozyrestaurant.status.cancel_tooltip": "Отменить заказ без последствий",
-  "gui.cozyrestaurant.status.cancel_rest_tooltip": "Отменится только то, что ещё не подали. Поданное нужно оплатить."
+  "gui.cozyrestaurant.status.cancel_rest_tooltip": "Отменится только то, что ещё не подали. Поданное нужно оплатить.",
+  "message.cozyrestaurant.bill.npc_nothing": "Посетитель ничего не заплатил: НПС платят только за еду"
 }
