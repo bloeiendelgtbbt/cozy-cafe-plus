@@ -11,7 +11,9 @@
     "Nitbe (original Cozy Cafe)",
     "Chakyl (original Cozy Cafe)"
   ],
-  "contact": {},
+  "contact": {
+    "email": "bloeiende@icloud.com"
+  },
   "license": "GPL-3.0-only",
   "icon": "logo.png",
   "environment": "*",

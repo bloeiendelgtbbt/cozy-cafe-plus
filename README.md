@@ -45,6 +45,10 @@ In English and Russian.*
 *Developed by bloeiende with AI assistance (Claude). Game design, testing and direction by bloeiende.
 Based on Cozy Cafe by Nitbe and Chakyl.*
 
+## Связь
+
+bloeiende@icloud.com
+
 ## Лицензия
 
 GPL-3.0, как и у оригинала (см. [LICENSE.txt](LICENSE.txt)). Что взято из оригинала и что изменено — в [CREDITS.txt](CREDITS.txt).
