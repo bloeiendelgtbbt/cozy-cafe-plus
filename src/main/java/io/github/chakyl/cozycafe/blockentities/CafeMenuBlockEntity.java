@@ -460,8 +460,9 @@ public class CafeMenuBlockEntity extends BlockEntity {
         CafeManagerBlockEntity cafe = CafeLookup.cafeAt(serverLevel, this.worldPosition);
         if (cafe == null) return Component.translatable("message.cozyrestaurant.order.no_cafe");
         if (!cafe.isOpen()) return Component.translatable("message.cozyrestaurant.order.closed", cafe.getCafeName());
-        if (!this.isSeatedHere(player)) return Component.translatable("message.cozyrestaurant.order.sit_down");
+        // Busy first: a busy table is busy whether you sit or stand.
         if (!this.isFree()) return Component.translatable("message.cozyrestaurant.order.table_busy");
+        if (!this.isSeatedHere(player)) return Component.translatable("message.cozyrestaurant.order.sit_down");
         return null;
     }
 

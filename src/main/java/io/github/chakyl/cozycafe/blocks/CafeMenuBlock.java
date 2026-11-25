@@ -88,6 +88,11 @@ public class CafeMenuBlock extends Block implements EntityBlock {
      */
     public static void handleClick(CafeMenuBlockEntity table, ServerPlayer player, ItemStack handStack) {
         CafeBill bill = table.getBill();
+        if (isTakenByOthers(table, player)) {
+            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.cozyrestaurant.order.table_busy")
+                    .withStyle(net.minecraft.ChatFormatting.RED), true);
+            return;
+        }
         if (bill != null) {
             if (player.getUUID().equals(bill.getGuest()) && !player.isShiftKeyDown()) {
                 table.openBill(player);
@@ -117,6 +122,22 @@ public class CafeMenuBlock extends Block implements EntityBlock {
         } else if (table.getGuestPlayer() == null && table.getPhase() == CafeMenuBlockEntity.Phase.NONE) {
             table.requestOrderScreen(player);
         }
+    }
+
+    /**
+     * Someone else (a player or an NPC) is at this table, at any stage, and the clicking player isn't staff who
+     * might have work there.
+     */
+    private static boolean isTakenByOthers(CafeMenuBlockEntity table, ServerPlayer player) {
+        CafeBill bill = table.getBill();
+        java.util.UUID me = player.getUUID();
+        if (me.equals(table.getGuestPlayer()) || (bill != null && me.equals(bill.getGuest()))) return false;
+        boolean taken = table.getGuestPlayer() != null || table.getHasCustomer() || bill != null
+                || table.getPhase() != CafeMenuBlockEntity.Phase.NONE;
+        if (!taken) return false;
+        io.github.chakyl.cozycafe.blockentities.CafeManagerBlockEntity cafe = table.getCafeManager(player.serverLevel());
+        if (cafe == null) cafe = io.github.chakyl.cozycafe.util.CafeLookup.cafeAt(player.serverLevel(), table.getBlockPos());
+        return cafe == null || !(io.github.chakyl.cozycafe.util.CafeAccess.isStaff(player, cafe) || io.github.chakyl.cozycafe.util.CafeAccess.isOperator(player));
     }
 
     @Override
