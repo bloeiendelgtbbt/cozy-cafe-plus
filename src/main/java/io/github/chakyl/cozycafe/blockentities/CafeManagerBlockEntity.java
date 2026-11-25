@@ -61,7 +61,7 @@ public class CafeManagerBlockEntity extends BlockEntity implements MenuProvider 
     /** NPCs come between 7:00 and 21:00 (day time 0 is 6:00). */
     private static final long DAY_OPENS = 1000L;
     private static final long DAY_CLOSES = 15000L;
-    /** When the next NPC visit is due; -1 = not planned yet (planned on the next tick). */
+    /** When the next NPC visit is due; -1 = not planned (planned once it's day and staff is on site). */
     private long nextVisitAt = -1;
 
     private boolean open = false;
@@ -111,9 +111,15 @@ public class CafeManagerBlockEntity extends BlockEntity implements MenuProvider 
         }
         if (!this.npcCustomers) return;
         long now = level.getGameTime();
-        if (this.nextVisitAt < 0) this.nextVisitAt = now + this.rollVisitDelay(level.random);
-        // A due visit waits for daytime and for someone to work here, then comes at once.
-        if (now >= this.nextVisitAt && now % 20 == 0 && this.npcsMayCome(serverLevel)) {
+        if (now % 20 != 0) return;
+        if (!this.npcsMayCome(serverLevel)) {
+            // Night, or nobody works here: the wait starts over once both are fine again.
+            this.nextVisitAt = -1;
+            return;
+        }
+        if (this.nextVisitAt < 0) {
+            this.nextVisitAt = now + this.rollVisitDelay(level.random);
+        } else if (now >= this.nextVisitAt) {
             this.assignCustomers(serverLevel);
             this.nextVisitAt = now + this.rollVisitDelay(level.random);
         }
@@ -140,6 +146,11 @@ public class CafeManagerBlockEntity extends BlockEntity implements MenuProvider 
         long time = level.getDayTime() % 24000L;
         if (time < DAY_OPENS || time >= DAY_CLOSES) return false;
         return this.staffOnSite(level);
+    }
+
+    /** When the next NPC visit is due, or -1 while none is planned. */
+    public long getNextVisitAt() {
+        return this.nextVisitAt;
     }
 
     public boolean staffOnSite(ServerLevel level) {

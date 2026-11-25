@@ -389,8 +389,29 @@ public class Stage5GameTests implements FabricGameTest {
         BlockPos far = inside.offset(40, 0, 0);
         owner.teleportTo(far.getX() + 0.5, far.getY(), far.getZ() + 0.5);
         helper.assertTrue(!cafe.npcsMayCome(level), "nobody works here: nobody comes");
+        cafe.setNpcCustomers(true);
+        owner.teleportTo(inside.getX() + 0.5, inside.getY(), inside.getZ() + 0.5);
+        tickManager(helper, cafe);
+        helper.assertTrue(cafe.getNextVisitAt() > 0, "day and staff: a visit is planned");
+        owner.teleportTo(far.getX() + 0.5, far.getY(), far.getZ() + 0.5);
+        tickManager(helper, cafe);
+        helper.assertTrue(cafe.getNextVisitAt() == -1, "staff left: the plan is dropped, nobody waits at the door");
+        owner.teleportTo(inside.getX() + 0.5, inside.getY(), inside.getZ() + 0.5);
+        tickManager(helper, cafe);
+        long planned = cafe.getNextVisitAt() - helper.getLevel().getGameTime();
+        helper.assertTrue(planned >= 1200L, "staff back: the wait starts over from now, got " + planned);
+        cafe.setNpcCustomers(false);
         level.setDayTime(dayTime);
         helper.assertTrue(cafe.getSpawnIntervalTicks() == 4 * 1200L, "5 stars: a visit every 4 minutes");
         finish(helper, cafe, region, owner);
+    }
+
+    /** Runs the manager's tick on a tick that checks the visit conditions (every 20 game ticks). */
+    private static void tickManager(GameTestHelper helper, CafeManagerBlockEntity cafe) {
+        net.minecraft.server.level.ServerLevel level = helper.getLevel();
+        long gameTime = level.getGameTime();
+        ((net.minecraft.world.level.storage.ServerLevelData) level.getLevelData()).setGameTime(gameTime + (20 - gameTime % 20) % 20);
+        cafe.tick(level, cafe.getBlockPos(), cafe.getBlockState());
+        ((net.minecraft.world.level.storage.ServerLevelData) level.getLevelData()).setGameTime(gameTime);
     }
 }
