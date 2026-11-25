@@ -1,0 +1,124 @@
+{
+  "variants": {
+    "facing=east,dish=false,dirty=false,bill=false": {
+      "model": "cozyrestaurant:block/cafe_menu",
+      "y": 90
+    },
+    "facing=east,dish=false,dirty=false,bill=true": {
+      "model": "cozyrestaurant:block/cafe_bill",
+      "y": 90
+    },
+    "facing=north,dish=false,dirty=false,bill=false": {
+      "model": "cozyrestaurant:block/cafe_menu"
+    },
+    "facing=north,dish=false,dirty=false,bill=true": {
+      "model": "cozyrestaurant:block/cafe_bill"
+    },
+    "facing=south,dish=false,dirty=false,bill=false": {
+      "model": "cozyrestaurant:block/cafe_menu",
+      "y": 180
+    },
+    "facing=south,dish=false,dirty=false,bill=true": {
+      "model": "cozyrestaurant:block/cafe_bill",
+      "y": 180
+    },
+    "facing=west,dish=false,dirty=false,bill=false": {
+      "model": "cozyrestaurant:block/cafe_menu",
+      "y": 270
+    },
+    "facing=west,dish=false,dirty=false,bill=true": {
+      "model": "cozyrestaurant:block/cafe_bill",
+      "y": 270
+    },
+    "facing=east,dish=true,dirty=false,bill=false": {
+      "model": "cozyrestaurant:item/serving_plate",
+      "y": 90
+    },
+    "facing=east,dish=true,dirty=false,bill=true": {
+      "model": "cozyrestaurant:block/cafe_bill",
+      "y": 90
+    },
+    "facing=north,dish=true,dirty=false,bill=false": {
+      "model": "cozyrestaurant:item/serving_plate"
+    },
+    "facing=north,dish=true,dirty=false,bill=true": {
+      "model": "cozyrestaurant:block/cafe_bill"
+    },
+    "facing=south,dish=true,dirty=false,bill=false": {
+      "model": "cozyrestaurant:item/serving_plate",
+      "y": 180
+    },
+    "facing=south,dish=true,dirty=false,bill=true": {
+      "model": "cozyrestaurant:block/cafe_bill",
+      "y": 180
+    },
+    "facing=west,dish=true,dirty=false,bill=false": {
+      "model": "cozyrestaurant:item/serving_plate",
+      "y": 270
+    },
+    "facing=west,dish=true,dirty=false,bill=true": {
+      "model": "cozyrestaurant:block/cafe_bill",
+      "y": 270
+    },
+    "facing=east,dish=true,dirty=true,bill=false": {
+      "model": "cozyrestaurant:item/dirty_serving_plate",
+      "y": 90
+    },
+    "facing=east,dish=true,dirty=true,bill=true": {
+      "model": "cozyrestaurant:block/cafe_bill",
+      "y": 90
+    },
+    "facing=north,dish=true,dirty=true,bill=false": {
+      "model": "cozyrestaurant:item/dirty_serving_plate"
+    },
+    "facing=north,dish=true,dirty=true,bill=true": {
+      "model": "cozyrestaurant:block/cafe_bill"
+    },
+    "facing=south,dish=true,dirty=true,bill=false": {
+      "model": "cozyrestaurant:item/dirty_serving_plate",
+      "y": 180
+    },
+    "facing=south,dish=true,dirty=true,bill=true": {
+      "model": "cozyrestaurant:block/cafe_bill",
+      "y": 180
+    },
+    "facing=west,dish=true,dirty=true,bill=false": {
+      "model": "cozyrestaurant:item/dirty_serving_plate",
+      "y": 270
+    },
+    "facing=west,dish=true,dirty=true,bill=true": {
+      "model": "cozyrestaurant:block/cafe_bill",
+      "y": 270
+    },
+    "facing=east,dish=false,dirty=true,bill=false": {
+      "model": "cozyrestaurant:item/dirty_serving_plate",
+      "y": 90
+    },
+    "facing=east,dish=false,dirty=true,bill=true": {
+      "model": "cozyrestaurant:block/cafe_bill",
+      "y": 90
+    },
+    "facing=north,dish=false,dirty=true,bill=false": {
+      "model": "cozyrestaurant:item/dirty_serving_plate"
+    },
+    "facing=north,dish=false,dirty=true,bill=true": {
+      "model": "cozyrestaurant:block/cafe_bill"
+    },
+    "facing=south,dish=false,dirty=true,bill=false": {
+      "model": "cozyrestaurant:item/dirty_serving_plate",
+      "y": 180
+    },
+    "facing=south,dish=false,dirty=true,bill=true": {
+      "model": "cozyrestaurant:block/cafe_bill",
+      "y": 180
+    },
+    "facing=west,dish=false,dirty=true,bill=false": {
+      "model": "cozyrestaurant:item/dirty_serving_plate",
+      "y": 270
+    },
+    "facing=west,dish=false,dirty=true,bill=true": {
+      "model": "cozyrestaurant:block/cafe_bill",
+      "y": 270
+    }
+  }
+}

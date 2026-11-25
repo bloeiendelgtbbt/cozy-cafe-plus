@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "cozyrestaurant:cafe_menu"
+    },
+    {
+      "tag": "minecraft:signs"
+    }
+  ],
+  "result": {
+    "item": "cozyrestaurant:cafe_sign"
+  }
+}

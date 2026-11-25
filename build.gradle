@@ -1,0 +1,101 @@
+plugins {
+    id 'fabric-loom' version '1.11.8'
+}
+
+version = project.mod_version
+group = project.maven_group
+base { archivesName = project.archives_base_name }
+
+repositories {
+    mavenCentral()
+    maven { name = 'ParchmentMC'; url = 'https://maven.parchmentmc.org' }
+    // Privit, Trinkets, Sit, Cloth Config and Xaero's Minimap come from Modrinth.
+    exclusiveContent {
+        forRepository { maven { name = 'Modrinth'; url = 'https://api.modrinth.com/maven' } }
+        filter { includeGroup 'maven.modrinth' }
+    }
+    // Cardinal Components (needed by Trinkets).
+    maven { name = 'Ladysnake'; url = 'https://maven.ladysnake.org/releases' }
+}
+
+sourceSets {
+    // Loot tables and mineable tags produced by the original Forge data generators.
+    main.resources.srcDir "src/generated/resources"
+    gametest {
+        compileClasspath += main.compileClasspath + main.output
+        runtimeClasspath += main.runtimeClasspath + main.output
+    }
+}
+
+loom {
+    accessWidenerPath = file('src/main/resources/cozyrestaurant.accesswidener')
+    runs {
+        server {
+            runDir 'run-server'
+        }
+        // A second client with its own folder (own Xaero waypoints and settings) for two-player tests.
+        guestClient {
+            client()
+            name 'Guest client'
+            runDir 'run-guest'
+        }
+        // Headless server that runs the GameTests in src/gametest and exits (no EULA, no world kept).
+        gametest {
+            server()
+            name 'GameTest'
+            source sourceSets.gametest
+            vmArg '-Dfabric-api.gametest'
+            vmArg "-Dfabric-api.gametest.report-file=${project.buildDir}/junit-gametest.xml"
+            runDir 'build/gametest'
+        }
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings loom.layered() {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${project.minecraft_version}:${project.parchment_version}@zip")
+    }
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    // Privit (claims) and Sit are hard dependencies; Trinkets is optional at runtime (apron rules).
+    // Versions are Modrinth version ids: Privit 1.4.6, Trinkets 3.7.2, Sit r27, Cloth Config 11.1.136.
+    modImplementation "maven.modrinth:privit:vqpABti3"
+    modImplementation "maven.modrinth:trinkets:AHxQGtuC"
+    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-base:5.2.0"
+    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:5.2.0"
+    // night-config is nested inside the Privit jar, which the dev runtime does not unpack.
+    runtimeOnly "com.electronwill.night-config:core:3.8.3"
+    runtimeOnly "com.electronwill.night-config:toml:3.8.3"
+    modRuntimeOnly "maven.modrinth:bl4cks-sit:48GA44kI"
+    modRuntimeOnly "maven.modrinth:cloth-config:2xQdCMyG"
+    // Xaero's Minimap is optional (cafe waypoints) and client-only: compiled against, never on the server classpath.
+    // For the dev client drop its jar into run/mods.
+    modCompileOnly "maven.modrinth:xaeros-minimap:PTqhBV8t"
+}
+
+processResources {
+    inputs.property 'version', project.version
+    filesMatching('fabric.mod.json') { expand 'version': project.version }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = 'UTF-8'
+    it.options.release = 17
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+jar {
+    from('LICENSE.txt') { rename { "${it}_${project.archives_base_name}" } }
+}
+
+// Privit claims made by a failed test would outlive it in the test world; start every test run from a fresh world.
+tasks.matching { it.name == 'runGametest' }.configureEach {
+    doFirst { delete file("${project.buildDir}/gametest/world") }
+}

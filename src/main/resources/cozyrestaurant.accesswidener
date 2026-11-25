@@ -1,0 +1,7 @@
+accessWidener v2 named
+# ItemOverrides is subclassed by ServingPlateItemOverrides (Forge made this constructor accessible).
+accessible method net/minecraft/client/renderer/block/model/ItemOverrides <init> ()V
+# Used to add generated menu items to the cozyrestaurant item tags (port of ForgeEvents.onDatapackSync).
+accessible method net/minecraft/core/HolderSet$Named bind (Ljava/util/List;)V
+accessible field net/minecraft/server/players/GameProfileCache profilesByName Ljava/util/Map;
+accessible class net/minecraft/server/players/GameProfileCache$GameProfileInfo

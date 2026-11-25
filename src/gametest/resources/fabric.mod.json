@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "cozyrestaurant-gametest",
+  "version": "1.0.0",
+  "name": "Cozy Cafe GameTests",
+  "environment": "*",
+  "entrypoints": { "fabric-gametest": ["io.github.chakyl.cozycafe.test.CozyCafeGameTests", "io.github.chakyl.cozycafe.test.Stage1GameTests", "io.github.chakyl.cozycafe.test.Stage2GameTests", "io.github.chakyl.cozycafe.test.Stage3GameTests",
+      "io.github.chakyl.cozycafe.test.Stage4GameTests", "io.github.chakyl.cozycafe.test.Stage5GameTests"] },
+  "depends": { "cozyrestaurant": "*", "fabric-gametest-api-v1": "*" }
+}

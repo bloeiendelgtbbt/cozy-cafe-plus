@@ -1,0 +1,22 @@
+{
+  "parent": "block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "paper": "cozyrestaurant:item/bill",
+    "particle": "cozyrestaurant:item/bill"
+  },
+  "elements": [
+    {
+      "from": [3, 0, 1],
+      "to": [13, 0.4, 15],
+      "faces": {
+        "up": {"uv": [3, 1, 13, 15], "rotation": 180, "texture": "#paper"},
+        "down": {"uv": [4, 2, 5, 3], "texture": "#paper", "cullface": "down"},
+        "north": {"uv": [4, 2, 5, 3], "texture": "#paper"},
+        "south": {"uv": [4, 2, 5, 3], "texture": "#paper"},
+        "east": {"uv": [4, 2, 5, 3], "texture": "#paper"},
+        "west": {"uv": [4, 2, 5, 3], "texture": "#paper"}
+      }
+    }
+  ]
+}

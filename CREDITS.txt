@@ -1,0 +1,36 @@
+Cozy Cafe+
+==========
+
+Cozy Cafe+ is a Fabric fork of Cozy Cafe by Nitbe and Chakyl:
+https://github.com/Chakyl/Cozy-Cafe
+
+The original mod (Forge, version 1.13) is licensed under the GNU General Public
+License v3.0, and so is this fork (see LICENSE.txt).
+
+Taken from the original
+-----------------------
+- The idea: tables with menus, serving plates, NPC customers who come to eat.
+- Block and item models, most textures and the clipboard-style GUI art.
+- Parts of the code (block entities, the customer entity, renderers), ported from
+  Forge to Fabric.
+
+Changed and added in Cozy Cafe+ (by bloeiende)
+---------------------------------------------
+- Ported to Fabric 1.20.1.
+- A cafe is a Privit claim: one Cafe Manager per claim; owner, waiters and the
+  waiter's apron; operators can step in.
+- A menu of any items with prices in a currency the owner picks; settings,
+  cash register and debtors tabs; the cafe rating.
+- Player guests: ordering, serving in parts, cancelling, timers, the bill with
+  payment and a 1-5 star rating, unpaid meals becoming debts.
+- NPC guests walk like villagers, open the cafe's doors, order and pay.
+- Shift report for the owner, the OPEN / CLOSED sign, waypoints for Xaero's
+  Minimap, the GUI reworked, Russian text.
+- GameTests covering the cafe's rules.
+
+Dependencies (not included in the jar)
+--------------------------------------
+- Fabric API
+- Privit by Slarrties (claims): https://modrinth.com/mod/privit
+- Sit by bl4ckscor3 (and Cloth Config, which Sit needs)
+- Optional: Trinkets (apron rules with accessories), Xaero's Minimap (waypoints)

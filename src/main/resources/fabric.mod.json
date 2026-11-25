@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "cozyrestaurant",
+  "version": "${version}",
+  "name": "Cozy Cafe+",
+  "description": "Fabric fork of Cozy Cafe for multiplayer: run a cafe in a Privit claim with waiters, a priced menu, bills, ratings and debts. A real-life job simulator.",
+  "authors": [
+    "bloeiende"
+  ],
+  "contributors": [
+    "Nitbe (original Cozy Cafe)",
+    "Chakyl (original Cozy Cafe)"
+  ],
+  "contact": {},
+  "license": "GPL-3.0-only",
+  "icon": "logo.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "io.github.chakyl.cozycafe.CozyCafe"
+    ],
+    "client": [
+      "io.github.chakyl.cozycafe.CozyCafeClient"
+    ]
+  },
+  "accessWidener": "cozyrestaurant.accesswidener",
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "minecraft": "~1.20.1",
+    "java": ">=17",
+    "fabric-api": "*",
+    "privit": ">=1.4.6",
+    "sit": "*"
+  },
+  "suggests": {
+    "trinkets": "*",
+    "xaerominimap": "*"
+  },
+  "mixins": [
+    "cozyrestaurant.mixins.json"
+  ]
+}

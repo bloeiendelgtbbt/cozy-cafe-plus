@@ -1,0 +1,244 @@
+package io.github.chakyl.cozycafe.entities;
+
+import com.mojang.authlib.GameProfile;
+import io.github.chakyl.cozycafe.blockentities.CafeMenuBlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.pathfinder.*;
+
+import java.util.EnumSet;
+
+public class CustomerEntity extends PathfinderMob {
+    public static final EntityDataAccessor<CompoundTag> SKIN_PROFILE = SynchedEntityData.defineId(CustomerEntity.class, EntityDataSerializers.COMPOUND_TAG);
+    private GameProfile cachedProfile = null;
+    private BlockPos targetMenuPos;
+    private BlockPos targetSignPos;
+    private int travelTime = 0;
+
+    public CustomerEntity(EntityType<? extends PathfinderMob> type, Level level) {
+        super(type, level);
+    }
+
+    @Override
+    protected void registerGoals() {
+        this.goalSelector.addGoal(0, new FloatGoal(this));
+        // Like villagers: open the wooden door, walk through, close it behind.
+        this.goalSelector.addGoal(1, new net.minecraft.world.entity.ai.goal.OpenDoorGoal(this, true));
+        this.goalSelector.addGoal(1, new NavigateToSignGoal(this, 0.9f));
+        this.goalSelector.addGoal(2, new NavigateToMenuGoal(this, 0.9f));
+        this.goalSelector.addGoal(3, new WaterAvoidingRandomStrollGoal(this, 0.7f));
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (!this.level().isClientSide) {
+            this.travelTime++;
+            if (this.travelTime >= CafeMenuBlockEntity.MAX_TRAVEL_TIME) {
+                this.discard();
+            }
+        }
+    }
+
+    public GameProfile getOrCreateProfile() {
+        return this.cachedProfile;
+    }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
+        super.onSyncedDataUpdated(pKey);
+        if (SKIN_PROFILE.equals(pKey)) {
+            CompoundTag tag = this.entityData.get(SKIN_PROFILE);
+            if (!tag.isEmpty()) {
+                this.cachedProfile = NbtUtils.readGameProfile(tag);
+            } else {
+                this.cachedProfile = null;
+            }
+        }
+    }
+
+    public BlockPos getTargetMenuPos() {
+        return this.targetMenuPos;
+    }
+
+    public void setTargetMenuPos(BlockPos pos) {
+        this.targetMenuPos = pos;
+    }
+
+    public BlockPos getTargetSignPos() {
+        return this.targetSignPos;
+    }
+
+    public void setTargetSignPos(BlockPos pos) {
+        this.targetSignPos = pos;
+    }
+
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(SKIN_PROFILE, new CompoundTag());
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag nbt) {
+        super.addAdditionalSaveData(nbt);
+        if (this.targetMenuPos != null) {
+            nbt.put("targetMenuPos", NbtUtils.writeBlockPos(this.targetMenuPos));
+        }
+        if (this.targetSignPos != null) {
+            nbt.put("targetSignPos", NbtUtils.writeBlockPos(this.targetSignPos));
+        }
+        nbt.putInt("travelTime", this.travelTime);
+        nbt.put("customerProfile", this.entityData.get(SKIN_PROFILE));
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag nbt) {
+        super.readAdditionalSaveData(nbt);
+        if (nbt.contains("targetMenuPos")) {
+            this.targetMenuPos = NbtUtils.readBlockPos(nbt.getCompound("targetMenuPos"));
+        }
+        if (nbt.contains("targetSignPos")) {
+            this.targetSignPos = NbtUtils.readBlockPos(nbt.getCompound("targetSignPos"));
+        }
+        this.travelTime = nbt.getInt("travelTime");
+        if (nbt.contains("customerProfile")) {
+            this.entityData.set(SKIN_PROFILE, nbt.getCompound("customerProfile"));
+        }
+    }
+
+    /** Plain vanilla walking, as villagers do: steps, stairs and slabs, opening wooden doors and gates on the way. */
+    @Override
+    protected PathNavigation createNavigation(Level level) {
+        GroundPathNavigation navigation = new GroundPathNavigation(this, level);
+        navigation.setCanOpenDoors(true);
+        navigation.setCanPassDoors(true);
+        navigation.setCanFloat(true);
+        return navigation;
+    }
+
+    public static class NavigateToSignGoal extends Goal {
+        private final CustomerEntity customer;
+        private final double speed;
+        private int timeToRecalcPath;
+
+        public NavigateToSignGoal(CustomerEntity customer, double speed) {
+            this.customer = customer;
+            this.speed = speed;
+            this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse() {
+            return this.customer.getTargetSignPos() != null;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return this.customer.getTargetSignPos() != null && !this.customer.getNavigation().isDone();
+        }
+
+        @Override
+        public void start() {
+            this.timeToRecalcPath = 0;
+        }
+
+        private boolean canReach(BlockPos target) {
+            return this.customer.distanceToSqr(target.getX() + 0.5, target.getY(), target.getZ() + 0.5) <= 4.0D;
+        }
+
+        @Override
+        public void tick() {
+            BlockPos target = this.customer.getTargetSignPos();
+            if (target == null) return;
+
+            if (--this.timeToRecalcPath <= 0) {
+                this.timeToRecalcPath = 10 + this.customer.getRandom().nextInt(10);
+
+                BlockPos floorTarget = target.below();
+                Path path = this.customer.getNavigation().createPath(floorTarget, 1);
+
+                if (path != null) {
+                    this.customer.getNavigation().moveTo(path, this.speed);
+                } else {
+                    this.customer.getNavigation().moveTo(floorTarget.getX() + 0.5, floorTarget.getY(), floorTarget.getZ() + 0.5, this.speed);
+                }
+            }
+
+            if (this.canReach(target)) {
+                this.customer.discard();
+            }
+        }
+    }
+
+    public static class NavigateToMenuGoal extends Goal {
+        private final CustomerEntity customer;
+        private final double speed;
+        private int timeToRecalcPath;
+
+        public NavigateToMenuGoal(CustomerEntity customer, double speed) {
+            this.customer = customer;
+            this.speed = speed;
+            this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse() {
+            BlockPos target = this.customer.getTargetMenuPos();
+            return target != null;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            BlockPos target = this.customer.getTargetMenuPos();
+            if (target == null) return false;
+            return !this.customer.getNavigation().isDone() && this.canReach(target);
+        }
+
+        @Override
+        public void start() {
+            this.timeToRecalcPath = 0;
+        }
+
+        private boolean canReach(BlockPos target) {
+            return this.customer.distanceToSqr(target.getX(), target.getY(), target.getZ()) <= 6.0D;
+        }
+
+        @Override
+        public void tick() {
+            BlockPos target = this.customer.getTargetMenuPos();
+            if (target == null) return;
+
+            if (--this.timeToRecalcPath <= 0) {
+                this.timeToRecalcPath = 10 + this.customer.getRandom().nextInt(10);
+
+                BlockPos floorTarget = target.below();
+                Path path = this.customer.getNavigation().createPath(floorTarget, 1);
+
+                if (path != null) {
+                    this.customer.getNavigation().moveTo(path, this.speed);
+                } else {
+                    this.customer.getNavigation().moveTo(floorTarget.getX() + 0.5, floorTarget.getY(), floorTarget.getZ() + 0.5, this.speed);
+                }
+            }
+
+            if (this.canReach(target)) {
+                if (this.customer.level().getBlockEntity(target) instanceof CafeMenuBlockEntity cafeMenuBlockEntity) {
+                    cafeMenuBlockEntity.onCustomerArrived(this.customer);
+                }
+            }
+        }
+    }
+}

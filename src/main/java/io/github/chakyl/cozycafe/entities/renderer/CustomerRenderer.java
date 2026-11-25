@@ -1,0 +1,42 @@
+package io.github.chakyl.cozycafe.entities.renderer;
+
+import com.mojang.blaze3d.vertex.PoseStack;
+import io.github.chakyl.cozycafe.entities.CustomerEntity;
+import io.github.chakyl.cozycafe.util.CustomerSkinInfo;
+import io.github.chakyl.cozycafe.util.CustomerSkinUtils;
+import net.minecraft.client.resources.DefaultPlayerSkin;
+import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.resources.ResourceLocation;
+
+public class CustomerRenderer extends MobRenderer<CustomerEntity, PlayerModel<CustomerEntity>> {
+
+    private final PlayerModel<CustomerEntity> slimModel;
+    private final PlayerModel<CustomerEntity> wideModel;
+
+    public CustomerRenderer(EntityRendererProvider.Context context) {
+        super(context, new PlayerModel<>(context.bakeLayer(ModelLayers.PLAYER), false), 0.5F);
+
+        this.wideModel = this.model;
+        this.slimModel = new PlayerModel<>(context.bakeLayer(ModelLayers.PLAYER_SLIM), true);
+    }
+
+    @Override
+    public ResourceLocation getTextureLocation(CustomerEntity entity) {
+        CustomerSkinInfo skin = CustomerSkinUtils.getCustomerSkinInfo(entity.getOrCreateProfile());
+        return skin != null ? skin.location() : DefaultPlayerSkin.getDefaultSkin();
+    }
+
+    @Override
+    public void render(CustomerEntity pEntity, float pEntityYaw, float pPartialTicks, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight) {
+        CustomerSkinInfo skin = CustomerSkinUtils.getCustomerSkinInfo(pEntity.getOrCreateProfile());
+        // Don't draw the customer until its skin has loaded, so it never appears as Steve first.
+        if (skin == null) return;
+        this.model = skin.isSlim() ? this.slimModel : this.wideModel;
+
+        super.render(pEntity, pEntityYaw, pPartialTicks, pPoseStack, pBuffer, pPackedLight);
+    }
+}
