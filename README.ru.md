@@ -2,6 +2,8 @@
 
 [English](README.md) | **Русский**
 
+**Скачать:** [CurseForge](https://www.curseforge.com/minecraft/mc-mods/cozy-cafe-plus) · [релизы на GitHub](https://github.com/bloeiendelgtbbt/cozy-cafe-plus/releases)
+
 Fabric-форк мода [Cozy Cafe](https://github.com/Chakyl/Cozy-Cafe) (Nitbe и Chakyl) с упором на мультиплеер:
 своё заведение на сервере, официанты, гости-игроки и НПС, меню с ценами, счёт, оценки и долги.
 Симулятор работы из реальной жизни. Английский и русский языки.

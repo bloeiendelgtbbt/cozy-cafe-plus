@@ -2,6 +2,8 @@
 
 **English** | [Русский](README.ru.md)
 
+**Download:** [CurseForge](https://www.curseforge.com/minecraft/mc-mods/cozy-cafe-plus) · [GitHub Releases](https://github.com/bloeiendelgtbbt/cozy-cafe-plus/releases)
+
 A Fabric fork of [Cozy Cafe](https://github.com/Chakyl/Cozy-Cafe) by Nitbe and Chakyl, built for multiplayer:
 run your own cafe on a server with waiters, player and NPC guests, a priced menu, bills, ratings and debts.
 A real-life job simulator. In English and Russian.
