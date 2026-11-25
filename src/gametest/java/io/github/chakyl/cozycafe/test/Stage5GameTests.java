@@ -447,4 +447,64 @@ public class Stage5GameTests implements FabricGameTest {
         helper.assertTrue(text.contains("2 64 2"), "with its coordinates");
         helper.succeed();
     }
+
+    private static long revenueOf(CafeManagerBlockEntity cafe) {
+        long sum = 0;
+        for (io.github.chakyl.cozycafe.data.CafeRevenue.Entry entry : cafe.getRevenue().entries()) sum += entry.count();
+        return sum;
+    }
+
+    private static ItemStack takeBill(GameTestHelper helper, ServerPlayer holder, CafeManagerBlockEntity cafe, int emeralds) {
+        ItemStack earnings = new ItemStack(Items.EMERALD, emeralds);
+        ItemStack bill = io.github.chakyl.cozycafe.item.BillItem.collected(CozyRegistry.ItemRegistry.BILL.get().getDefaultInstance(),
+                helper.getLevel(), cafe.getBlockPos(), earnings, 0, "Guest");
+        io.github.chakyl.cozycafe.item.BillItem.setId(bill, io.github.chakyl.cozycafe.data.CafeHandovers.billTaken(holder, cafe, earnings));
+        return bill;
+    }
+
+    @GameTest(template = EMPTY_STRUCTURE, batch = "unhandedBills")
+    public void unhandedBills(GameTestHelper helper) {
+        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        ServerPlayer waiter = helper.makeMockServerPlayerInLevel();
+        waiter.setGameMode(GameType.SURVIVAL);
+        helper.setBlock(new BlockPos(1, 1, 1), CozyRegistry.BlockRegistry.CAFE_MANAGER.get());
+        CafeManagerBlockEntity cafe = (CafeManagerBlockEntity) helper.getBlockEntity(new BlockPos(1, 1, 1));
+        cafe.setOwner(owner.getUUID(), owner.getGameProfile().getName());
+        cafe.setCurrency(new ItemStack(Items.EMERALD));
+        cafe.addWaiter(waiter.getUUID(), waiter.getGameProfile().getName());
+        io.github.chakyl.cozycafe.data.CafeHandovers handovers = io.github.chakyl.cozycafe.data.CafeHandovers.get(helper.getLevel().getServer());
+
+        ItemStack first = takeBill(helper, waiter, cafe, 5);
+        ItemStack second = takeBill(helper, waiter, cafe, 3);
+        List<io.github.chakyl.cozycafe.data.CafeHandovers.Summary> mine = handovers.forHolder(waiter.getUUID());
+        helper.assertTrue(mine.size() == 1 && mine.get(0).count() == 2 && mine.get(0).amounts().get(0).getCount() == 8, "two bills worth 8 are owed");
+        helper.assertTrue(cafe.getUpdateTag().getList("handovers", 10).size() == 1, "the owner's tab sees the waiter");
+
+        // Out of pocket: 6 emeralds pay the older bill (5) and 1 of the newer one.
+        ItemStack money = new ItemStack(Items.EMERALD, 6);
+        helper.assertTrue(cafe.payBillsFromPocket(waiter, money), "paid out of pocket");
+        helper.assertTrue(money.isEmpty() && revenueOf(cafe) == 6, "the money went to the register");
+        helper.assertTrue(handovers.forHolder(waiter.getUUID()).get(0).count() == 1, "the older bill is settled");
+
+        // The settled paper is worthless; the other one is worth only what is left on it.
+        helper.assertTrue(cafe.cashBill(waiter, first) && first.isEmpty() && revenueOf(cafe) == 6, "the paid bill is void");
+        helper.assertTrue(cafe.cashBill(waiter, second) && revenueOf(cafe) == 8, "the rest is cashed");
+        helper.assertTrue(!handovers.hasBills(waiter.getUUID(), cafe.getCafeId()), "nothing owed any more");
+
+        // Too much money: only what is owed is taken.
+        takeBill(helper, waiter, cafe, 2);
+        ItemStack more = new ItemStack(Items.EMERALD, 10);
+        cafe.payBillsFromPocket(waiter, more);
+        helper.assertTrue(more.getCount() == 8, "the change stays in hand");
+
+        // The owner forgives; the owner's own bills count too.
+        ItemStack forgiven = takeBill(helper, waiter, cafe, 4);
+        takeBill(helper, owner, cafe, 1);
+        helper.assertTrue(handovers.forCafe(cafe.getCafeId()).size() == 2, "the owner is listed too");
+        helper.assertTrue(handovers.forgive(helper.getLevel().getServer(), cafe.getCafeId(), waiter.getUUID()), "forgiven");
+        long before = revenueOf(cafe);
+        helper.assertTrue(cafe.cashBill(waiter, forgiven) && revenueOf(cafe) == before, "a forgiven bill is void");
+        helper.assertTrue(!cafe.payBillsFromPocket(waiter, new ItemStack(Items.EMERALD, 3)), "nothing to pay any more");
+        helper.succeed();
+    }
 }

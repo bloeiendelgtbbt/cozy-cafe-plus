@@ -809,6 +809,8 @@ public class CafeMenuBlockEntity extends BlockEntity {
             } else {
                 ItemStack collected = BillItem.collected(CozyRegistry.ItemRegistry.BILL.get().getDefaultInstance(), this.level,
                         this.cafeManager, earnings, this.bill.needsRating() ? this.bill.getRating() : 0, this.bill.getGuestName());
+                // From now on the cafe keeps track of the bill until it is cashed at the manager.
+                BillItem.setId(collected, io.github.chakyl.cozycafe.data.CafeHandovers.billTaken(player, cafe, earnings));
                 giveOrDrop(player, collected);
                 player.displayClientMessage(Component.translatable(this.bill.isClosed()
                         ? "message.cozyrestaurant.bill.collected_partial" : "message.cozyrestaurant.bill.collected").withStyle(ChatFormatting.GREEN), true);

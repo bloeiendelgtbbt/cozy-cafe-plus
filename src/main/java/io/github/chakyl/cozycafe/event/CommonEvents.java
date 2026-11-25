@@ -60,6 +60,7 @@ public class CommonEvents {
             io.github.chakyl.cozycafe.data.CafeDirectory.get(server).sendTo(handler.getPlayer());
             io.github.chakyl.cozycafe.data.CafeReports.get(server).sendPending(handler.getPlayer());
             io.github.chakyl.cozycafe.data.CafeNews.playerJoined(handler.getPlayer());
+            io.github.chakyl.cozycafe.data.CafeHandovers.sendTo(handler.getPlayer(), false);
         });
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             ApronRules.forget(handler.getPlayer().getUUID());

@@ -43,6 +43,8 @@ public class EvilPacketsIHateThem {
     public static final ResourceLocation CAFE_WAYPOINTS = id(ClientBoundCafeWaypointsPacket.class, "cafe_waypoints");
     public static final ResourceLocation ORDER_STATUS = id(ClientBoundOrderStatusPacket.class, "order_status");
     public static final ResourceLocation CANCEL_ORDER = id(ServerBoundCancelOrderPacket.class, "cancel_order");
+    public static final ResourceLocation HANDOVERS = id(ClientBoundHandoversPacket.class, "handovers");
+    public static final ResourceLocation FORGIVE_HANDOVER = id(ServerBoundForgiveHandoverPacket.class, "forgive_handover");
 
     private static ResourceLocation id(Class<?> packetClass, String path) {
         ResourceLocation id = new ResourceLocation(CozyCafe.MODID, path);
@@ -58,6 +60,7 @@ public class EvilPacketsIHateThem {
         serverbound(PLACE_ORDER, ServerBoundPlaceOrderPacket::new);
         serverbound(FORGIVE_DEBT, ServerBoundForgiveDebtPacket::new);
         serverbound(CANCEL_ORDER, ServerBoundCancelOrderPacket::new);
+        serverbound(FORGIVE_HANDOVER, ServerBoundForgiveHandoverPacket::new);
     }
 
     private static void serverbound(ResourceLocation id, Function<FriendlyByteBuf, ? extends ServerHandled> decoder) {
@@ -76,6 +79,7 @@ public class EvilPacketsIHateThem {
         clientbound(OPEN_ORDER, ClientBoundOpenOrderPacket::new);
         clientbound(CAFE_WAYPOINTS, ClientBoundCafeWaypointsPacket::new);
         clientbound(ORDER_STATUS, ClientBoundOrderStatusPacket::new);
+        clientbound(HANDOVERS, ClientBoundHandoversPacket::new);
     }
 
     private static void clientbound(ResourceLocation id, Function<FriendlyByteBuf, ? extends ClientHandled> decoder) {

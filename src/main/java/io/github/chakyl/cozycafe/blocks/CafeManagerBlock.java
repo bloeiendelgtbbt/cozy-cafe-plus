@@ -128,8 +128,13 @@ public class CafeManagerBlock extends Block implements EntityBlock {
                     return InteractionResult.CONSUME;
                 }
                 if (pHand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
+                // Paying for lost (unhanded) bills out of pocket: right-click with the money.
+                if (!held.isEmpty() && cafeManagerBlockEntity.payBillsFromPocket((ServerPlayer) pPlayer, held)) {
+                    return InteractionResult.CONSUME;
+                }
                 if (!CafeAccess.canManage(pPlayer, cafeManagerBlockEntity)) {
-                    pPlayer.displayClientMessage(CafeAccess.deniedMessage(cafeManagerBlockEntity), true);
+                    // Everyone else gets their own tablet: the bills they still have to hand in, in every cafe.
+                    io.github.chakyl.cozycafe.data.CafeHandovers.sendTo((ServerPlayer) pPlayer, true);
                     return InteractionResult.CONSUME;
                 }
                 CafeManagerMenu.open((ServerPlayer) pPlayer, cafeManagerBlockEntity);

@@ -80,6 +80,11 @@ public class ServerBoundCafeActionPacket implements EvilPacketsIHateThem.ServerH
             case OPEN_SETTINGS -> CafeSettingsMenu.open(player, cafe);
             case SET_NPC_CUSTOMERS -> cafe.setNpcCustomers(this.a != 0);
             case WITHDRAW -> {
+                if (cafe.isOpen()) {
+                    // The register is cashed only between shifts.
+                    CafeManagerBlockEntity.feedback(player, Component.translatable("message.cozyrestaurant.revenue.close_shift_first"), false);
+                    return;
+                }
                 long given = cafe.withdrawRevenue(player);
                 boolean left = !cafe.getRevenue().isEmpty();
                 Component message = given == 0

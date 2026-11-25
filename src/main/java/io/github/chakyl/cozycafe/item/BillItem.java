@@ -73,6 +73,18 @@ public class BillItem extends Item {
         return tag == null ? ItemStack.EMPTY : ItemStack.of(tag.getCompound("earnings"));
     }
 
+    /** The bill's id in the list of bills still to be handed in; null for bills from before that list existed. */
+    @Nullable
+    public static java.util.UUID id(ItemStack stack) {
+        CompoundTag tag = data(stack);
+        return tag != null && tag.hasUUID("id") ? tag.getUUID("id") : null;
+    }
+
+    public static void setId(ItemStack stack, java.util.UUID id) {
+        CompoundTag tag = data(stack);
+        if (tag != null) tag.putUUID("id", id);
+    }
+
     public static int rating(ItemStack stack) {
         CompoundTag tag = data(stack);
         return tag == null ? 0 : tag.getInt("rating");

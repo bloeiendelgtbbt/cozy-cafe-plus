@@ -274,6 +274,7 @@ public class CafeManagerBlockEntity extends BlockEntity implements MenuProvider 
     public void reportShift() {
         if (!(this.level instanceof ServerLevel serverLevel) || this.owner == null) return;
         io.github.chakyl.cozycafe.data.CafeReports.deliver(serverLevel.getServer(), this.owner, this.shift.report(this.cafeName));
+        io.github.chakyl.cozycafe.data.CafeHandovers.shiftClosed(serverLevel.getServer(), this);
         this.shift.reset();
         this.setChanged();
     }
@@ -464,18 +465,54 @@ public class CafeManagerBlockEntity extends BlockEntity implements MenuProvider 
      * Cashes a collected bill: the earnings go into the cash register and the guest's rating (if any) counts.
      * Staff only; the bill must belong to this cafe. The bill item is used up.
      */
+    /**
+     * A staff member pays for bills they did not hand in (lost ones, say) out of pocket, with the money in hand.
+     * Returns false when the player has no such bills here in that currency.
+     */
+    public boolean payBillsFromPocket(ServerPlayer player, ItemStack money) {
+        io.github.chakyl.cozycafe.data.CafeHandovers handovers = io.github.chakyl.cozycafe.data.CafeHandovers.get(player.server);
+        if (money.isEmpty() || !handovers.hasBills(player.getUUID(), this.cafeId)) return false;
+        int used = handovers.payFromPocket(player.server, player.getUUID(), this.cafeId, money);
+        if (used <= 0) return false;
+        this.revenue.deposit(money.copyWithCount(used));
+        ItemStack paid = money.copyWithCount(used);
+        money.shrink(used);
+        this.markUpdated();
+        player.displayClientMessage(Component.translatable(handovers.hasBills(player.getUUID(), this.cafeId)
+                ? "message.cozyrestaurant.handover.paid_some" : "message.cozyrestaurant.handover.paid_all",
+                used, paid.getHoverName()).withStyle(ChatFormatting.GREEN), true);
+        this.level.playSound(null, this.worldPosition, net.minecraft.sounds.SoundEvents.EXPERIENCE_ORB_PICKUP, net.minecraft.sounds.SoundSource.BLOCKS, 0.6F, 1.2F);
+        return true;
+    }
+
     public boolean cashBill(Player player, ItemStack billStack) {
-        if (!io.github.chakyl.cozycafe.item.BillItem.isCollected(billStack) || this.level == null) return false;
-        if (!CafeAccess.isStaff(player, this) && !CafeAccess.isOperator(player)) {
+        if (!io.github.chakyl.cozycafe.item.BillItem.isCollected(billStack) || !(this.level instanceof ServerLevel serverLevel)) return false;
+        io.github.chakyl.cozycafe.data.CafeHandovers handovers = io.github.chakyl.cozycafe.data.CafeHandovers.get(serverLevel.getServer());
+        UUID billId = io.github.chakyl.cozycafe.item.BillItem.id(billStack);
+        io.github.chakyl.cozycafe.data.CafeHandovers.CashResult tracked = handovers.check(billId, this.cafeId);
+        // Whoever took the bill may always hand it in, even after leaving the staff.
+        boolean holder = tracked == io.github.chakyl.cozycafe.data.CafeHandovers.CashResult.OK && player.getUUID().equals(handovers.holderOf(billId));
+        if (!holder && !CafeAccess.isStaff(player, this) && !CafeAccess.isOperator(player)) {
             player.displayClientMessage(CafeAccess.deniedMessage(this), true);
             return false;
         }
-        if (!this.worldPosition.equals(io.github.chakyl.cozycafe.item.BillItem.managerPos(billStack))
-                || !this.level.dimension().equals(io.github.chakyl.cozycafe.item.BillItem.dimension(billStack))) {
+        if (tracked == io.github.chakyl.cozycafe.data.CafeHandovers.CashResult.VOID) {
+            // Paid out of pocket or forgiven already: the paper is worthless now.
+            billStack.shrink(1);
+            player.displayClientMessage(Component.translatable("message.cozyrestaurant.bill.void").withStyle(ChatFormatting.YELLOW), true);
+            return true;
+        }
+        boolean ours = tracked == io.github.chakyl.cozycafe.data.CafeHandovers.CashResult.OK
+                || (tracked == io.github.chakyl.cozycafe.data.CafeHandovers.CashResult.UNKNOWN
+                && this.worldPosition.equals(io.github.chakyl.cozycafe.item.BillItem.managerPos(billStack))
+                && this.level.dimension().equals(io.github.chakyl.cozycafe.item.BillItem.dimension(billStack)));
+        if (!ours) {
             player.displayClientMessage(Component.translatable("message.cozyrestaurant.bill.other_cafe").withStyle(ChatFormatting.RED), true);
             return false;
         }
-        ItemStack earnings = io.github.chakyl.cozycafe.item.BillItem.earnings(billStack);
+        ItemStack earnings = tracked == io.github.chakyl.cozycafe.data.CafeHandovers.CashResult.OK
+                ? handovers.cashed(serverLevel.getServer(), billId)
+                : io.github.chakyl.cozycafe.item.BillItem.earnings(billStack);
         int rating = io.github.chakyl.cozycafe.item.BillItem.rating(billStack);
         if (!earnings.isEmpty()) this.revenue.deposit(earnings);
         if (rating > 0) {
@@ -604,6 +641,7 @@ public class CafeManagerBlockEntity extends BlockEntity implements MenuProvider 
         if (this.level != null && !this.level.isClientSide()) {
             this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), 3);
             io.github.chakyl.cozycafe.data.CafeDirectory.update(this);
+            io.github.chakyl.cozycafe.data.CafeHandovers.cafeUpdated(this);
         }
     }
 
@@ -702,6 +740,13 @@ public class CafeManagerBlockEntity extends BlockEntity implements MenuProvider 
         this.revenue.load(nbt.getList("revenue", Tag.TAG_COMPOUND));
         this.debts.load(nbt.getList("debts", Tag.TAG_COMPOUND));
         this.linkedSign = nbt.contains("LinkedSign") ? NbtUtils.readBlockPos(nbt.getCompound("LinkedSign")) : null;
+        if (nbt.contains("handovers")) {
+            this.handovers.clear();
+            net.minecraft.resources.ResourceLocation dimension = this.level == null ? Level.OVERWORLD.location() : this.level.dimension().location();
+            for (Tag tag : nbt.getList("handovers", Tag.TAG_COMPOUND)) {
+                this.handovers.add(io.github.chakyl.cozycafe.data.CafeHandovers.Summary.load((CompoundTag) tag, this.cafeId, this.cafeName, dimension, this.worldPosition));
+            }
+        }
     }
 
     @Nullable
@@ -714,7 +759,22 @@ public class CafeManagerBlockEntity extends BlockEntity implements MenuProvider 
     public CompoundTag getUpdateTag() {
         CompoundTag tag = new CompoundTag();
         this.saveAdditional(tag);
+        // Only for the owner's "unhanded bills" tab: lives in the server's list, not in the block.
+        if (this.level instanceof ServerLevel serverLevel) {
+            ListTag list = new ListTag();
+            for (io.github.chakyl.cozycafe.data.CafeHandovers.Summary summary : io.github.chakyl.cozycafe.data.CafeHandovers.get(serverLevel.getServer()).forCafe(this.cafeId)) {
+                list.add(summary.save());
+            }
+            tag.put("handovers", list);
+        }
         return tag;
+    }
+
+    /** Client copy of the bills staff have not handed in yet (from the update tag). */
+    private final List<io.github.chakyl.cozycafe.data.CafeHandovers.Summary> handovers = new ArrayList<>();
+
+    public List<io.github.chakyl.cozycafe.data.CafeHandovers.Summary> getHandovers() {
+        return this.handovers;
     }
 
     /** Sends a reason (why something was refused) to a player's open cafe screen, or their action bar. */

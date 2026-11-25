@@ -171,6 +171,9 @@ public class CafeManagerScreen extends AbstractContainerScreen<CafeManagerMenu> 
         this.addRenderableWidget(Button.builder(Component.translatable("gui.cozyrestaurant.cafe_manager.debtors"),
                         (button) -> this.minecraft.setScreen(new DebtorsScreen(this, this.menu.blockEntity)))
                 .bounds(leftPos + this.imageWidth + 2, topPos + 72, 76, 20).build());
+        this.addRenderableWidget(Button.builder(Component.translatable("gui.cozyrestaurant.cafe_manager.handovers"),
+                        (button) -> this.minecraft.setScreen(new HandoversScreen(this, this.menu.blockEntity)))
+                .bounds(leftPos + this.imageWidth + 2, topPos + 94, 76, 20).build());
     }
 
 
@@ -230,7 +233,7 @@ public class CafeManagerScreen extends AbstractContainerScreen<CafeManagerMenu> 
         }
         if (this.menu.blockEntity.hasOwner()) {
             // Under the side tabs, wrapped to the tab width.
-            int y = top + 96;
+            int y = top + 118;
             for (net.minecraft.util.FormattedCharSequence line : this.font.split(Component.translatable("gui.cozyrestaurant.cafe_manager.owner", this.menu.blockEntity.getOwnerName()), 76)) {
                 gfx.drawString(this.font, line, left + this.imageWidth + 3, y, 0xFFFFFF, true);
                 y += 10;

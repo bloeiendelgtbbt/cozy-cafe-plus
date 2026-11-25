@@ -50,11 +50,13 @@ public class CozyCafeClient implements ClientModInitializer {
         BlockEntityRenderers.register(CozyRegistry.BlockEntityRegistry.CAFE_MENU.get(), CafeMenuBlockEntityRenderer::new);
         BlockEntityRenderers.register(CozyRegistry.BlockEntityRegistry.PLATING_STATION.get(), PlatingStationBlockEntityRenderer::new);
         BlockEntityRenderers.register(CozyRegistry.BlockEntityRegistry.CAFE_SIGN.get(), io.github.chakyl.cozycafe.blockentities.renderer.CafeSignBlockEntityRenderer::new);
+        BlockEntityRenderers.register(CozyRegistry.BlockEntityRegistry.CAFE_MANAGER.get(), io.github.chakyl.cozycafe.blockentities.renderer.CafeManagerBlockEntityRenderer::new);
         EntityRendererRegistry.register(CozyRegistry.EntityRegistry.CUSTOMER.get(), CustomerRenderer::new);
         ArmorRenderer.register(new ApronArmorRenderer(), CozyRegistry.ItemRegistry.APRON.get());
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             ClientHooks.clearRoles();
             io.github.chakyl.cozycafe.client.CafeWaypoints.clear();
+            io.github.chakyl.cozycafe.client.ClientHandovers.clear();
         });
         net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(io.github.chakyl.cozycafe.client.CafeWaypoints::tick);
         // Brigadier allows only latin letters in command names, so this one can't be Russian.
