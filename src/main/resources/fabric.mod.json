@@ -12,7 +12,10 @@
     "Chakyl (original Cozy Cafe)"
   ],
   "contact": {
-    "email": "bloeiende@icloud.com"
+    "email": "bloeiende@icloud.com",
+    "homepage": "https://github.com/bloeiendelgtbbt/cozy-cafe-plus",
+    "sources": "https://github.com/bloeiendelgtbbt/cozy-cafe-plus",
+    "issues": "https://github.com/bloeiendelgtbbt/cozy-cafe-plus/issues"
   },
   "license": "GPL-3.0-only",
   "icon": "logo.png",
