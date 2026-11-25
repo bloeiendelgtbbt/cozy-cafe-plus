@@ -134,6 +134,8 @@ public class CafeManagerScreen extends AbstractContainerScreen<CafeManagerMenu> 
                 EvilPacketsIHateThem.sendToServer(new ServerBoundRenameCafePacket(this.menu.blockEntity.getBlockPos(), this.nameField.getValue()));
             } else {
                 this.nameField.setValue(this.menu.getCafeName());
+                // The screen must focus the field too: typed characters go to the screen's focused widget.
+                this.setFocused(this.nameField);
                 this.nameField.setFocused(true);
             }
         });
@@ -189,6 +191,13 @@ public class CafeManagerScreen extends AbstractContainerScreen<CafeManagerMenu> 
         }
 
         return super.keyPressed(pKeyCode, pScanCode, pModifiers);
+    }
+
+    @Override
+    public boolean charTyped(char codePoint, int modifiers) {
+        // Letters reach the name field even if another widget (the edit button just clicked) holds the screen's focus.
+        if (this.nameField.isFocused()) return this.nameField.charTyped(codePoint, modifiers);
+        return super.charTyped(codePoint, modifiers);
     }
 
     @Override
