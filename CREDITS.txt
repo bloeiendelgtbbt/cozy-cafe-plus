@@ -23,7 +23,9 @@ Changed and added in Cozy Cafe+ (by bloeiende)
   cash register and debtors tabs; the cafe rating.
 - Player guests: ordering, serving in parts, cancelling, timers, the bill with
   payment and a 1-5 star rating, unpaid meals becoming debts.
-- NPC guests walk like villagers, open the cafe's doors, order and pay.
+- NPC guests walk like villagers and open the cafe's doors. They come by day,
+  only while staff is on site, more often at higher ratings, and pay by how
+  filling the served food was.
 - Shift report for the owner, the OPEN / CLOSED sign, waypoints for Xaero's
   Minimap, the GUI reworked, English and Russian text.
 - GameTests covering the cafe's rules.
