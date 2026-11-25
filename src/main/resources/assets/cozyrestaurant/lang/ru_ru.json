@@ -1,6 +1,5 @@
 {
   "itemGroup.cozyrestaurant": "Cozy Cafe+",
-  "itemGroup.cozyrestaurant.creative_tab": "Cozy Cafe+",
   "block.cozyrestaurant.cafe_manager": "Менеджер заведения",
   "block.cozyrestaurant.cafe_menu": "Столик с меню",
   "block.cozyrestaurant.plating_station": "Станция сервировки",
@@ -148,8 +147,6 @@
   "message.cozyrestaurant.order.bad_time": "Время ожидания — от 1 до %s минут",
   "message.cozyrestaurant.order.menu_changed": "Меню изменилось, откройте его заново",
   "message.cozyrestaurant.order.placed": "Заказ принят!",
-  "message.cozyrestaurant.order.served": "Ваш заказ подан! Нажмите ПКМ по столику, чтобы взять еду.",
-  "message.cozyrestaurant.order.cancelled_left": "Вы встали из-за стола — заказ отменён.",
   "message.cozyrestaurant.order.cancelled_closed": "Заведение закрылось — заказ отменён.",
   "message.cozyrestaurant.order.timed_out": "Время ожидания вышло — заказ отменён. Можно заказать заново.",
   "message.cozyrestaurant.bill.already": "На столе уже лежит счёт",

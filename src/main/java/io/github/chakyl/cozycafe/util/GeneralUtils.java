@@ -11,7 +11,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -23,10 +22,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class GeneralUtils {
-
-    public static int getDay(Level level) {
-        return (int) (Math.floor((double) level.dayTime() / 24000) + 1);
-    }
 
     public static String formatPrice(int number) {
         return formatPrice(String.valueOf(number), true);

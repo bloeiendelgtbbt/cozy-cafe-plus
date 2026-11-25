@@ -542,10 +542,6 @@ public class CafeManagerBlockEntity extends BlockEntity implements MenuProvider 
     }
 
     @Nullable
-    public UUID getOwner() {
-        return this.owner;
-    }
-
     public String getOwnerName() {
         return this.ownerName;
     }
@@ -585,10 +581,6 @@ public class CafeManagerBlockEntity extends BlockEntity implements MenuProvider 
     }
 
     @Nullable
-    public BlockPos getLinkedSign() {
-        return this.linkedSign;
-    }
-
     public void setLinkedSign(@Nullable BlockPos linkedSign) {
         this.linkedSign = linkedSign;
         this.markUpdated();

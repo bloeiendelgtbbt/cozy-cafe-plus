@@ -1,6 +1,5 @@
 {
   "itemGroup.cozyrestaurant": "Cozy Cafe+",
-  "itemGroup.cozyrestaurant.creative_tab": "Cozy Cafe+",
   "block.cozyrestaurant.cafe_manager": "Cafe Manager",
   "block.cozyrestaurant.cafe_menu": "Cafe Table Menu",
   "block.cozyrestaurant.plating_station": "Plating Station",
@@ -148,8 +147,6 @@
   "message.cozyrestaurant.order.bad_time": "Waiting time: 1 to %s minutes",
   "message.cozyrestaurant.order.menu_changed": "The menu has changed, open it again",
   "message.cozyrestaurant.order.placed": "Order placed!",
-  "message.cozyrestaurant.order.served": "Your order is served! Right-click the table to take your food.",
-  "message.cozyrestaurant.order.cancelled_left": "You left the table: the order is cancelled.",
   "message.cozyrestaurant.order.cancelled_closed": "The cafe has closed: the order is cancelled.",
   "message.cozyrestaurant.order.timed_out": "Time's up: the order is cancelled. You can order again.",
   "message.cozyrestaurant.bill.already": "There's already a bill on the table",

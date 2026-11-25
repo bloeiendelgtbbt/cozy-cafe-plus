@@ -52,7 +52,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -1053,10 +1052,6 @@ public class CafeMenuBlockEntity extends BlockEntity {
         return this.guestPlayer;
     }
 
-    public int getCustomerTravelTime() {
-        return this.customerTravelTime;
-    }
-
     @Nullable
     public BlockPos getCafeManager() {
         return this.cafeManager;
@@ -1065,11 +1060,6 @@ public class CafeMenuBlockEntity extends BlockEntity {
     @Nullable
     public GameProfile getGameProfile() {
         return this.gameProfile;
-    }
-
-    // Was a Forge render-bounds override; vanilla has no equivalent hook and does not need one here.
-    public AABB getRenderBoundingBox() {
-        return new AABB(this.worldPosition).expandTowards(0, 1.5, 0).inflate(0.5, 0, 0.5);
     }
 
     private void setChangedForRender() {

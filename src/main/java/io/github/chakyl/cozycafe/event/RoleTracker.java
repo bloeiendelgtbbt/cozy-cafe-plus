@@ -51,10 +51,6 @@ public final class RoleTracker {
         return null;
     }
 
-    public static Map<UUID, CafeRole> getCurrentRoles() {
-        return currentRoles;
-    }
-
     public static void sendTo(ServerPlayer player) {
         EvilPacketsIHateThem.sendToPlayer(new ClientBoundRolesPacket(new HashMap<>(currentRoles)), player);
     }
