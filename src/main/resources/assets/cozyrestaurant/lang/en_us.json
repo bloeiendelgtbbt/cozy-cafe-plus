@@ -220,5 +220,6 @@
   "message.cozyrestaurant.bill.npc_nothing": "The customer paid nothing: NPCs only pay for food",
   "message.cozyrestaurant.cafe.missed": "☕ New cafes opened while you were away:",
   "message.cozyrestaurant.cafe.all_cafes": "☕ Cafes on this server — come visit:",
-  "message.cozyrestaurant.cafe.and_more": "…and %s more"
+  "message.cozyrestaurant.cafe.and_more": "…and %s more",
+  "message.cozyrestaurant.bill.npc_too_little": "The customer ate, but the order was too small to pay for"
 }

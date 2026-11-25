@@ -220,5 +220,6 @@
   "message.cozyrestaurant.bill.npc_nothing": "Посетитель ничего не заплатил: НПС платят только за еду",
   "message.cozyrestaurant.cafe.missed": "☕ Пока вас не было, открылись новые заведения:",
   "message.cozyrestaurant.cafe.all_cafes": "☕ Заведения на сервере — заходите в гости:",
-  "message.cozyrestaurant.cafe.and_more": "…и ещё %s"
+  "message.cozyrestaurant.cafe.and_more": "…и ещё %s",
+  "message.cozyrestaurant.bill.npc_too_little": "Гость поел, но заказ был слишком скромным: на оплату не хватило"
 }

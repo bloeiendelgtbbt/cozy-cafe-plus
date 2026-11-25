@@ -799,7 +799,11 @@ public class CafeMenuBlockEntity extends BlockEntity {
             ItemStack earnings = this.bill.takeEarnings(tips);
             if (this.bill.isDebt() && !earnings.isEmpty()) cafe.payDebt(this.bill.getGuest(), earnings, earnings.getCount());
             if (earnings.isEmpty() && this.bill.isNpc()) {
-                player.displayClientMessage(Component.translatable("message.cozyrestaurant.bill.npc_nothing").withStyle(ChatFormatting.YELLOW), true);
+                // Nothing filling at all (grass, blocks) vs. real food that was just too little to pay for.
+                double points = 0;
+                for (CafeMenuEntry line : this.bill.getLines()) points += foodPoints(line.item());
+                player.displayClientMessage(Component.translatable(points > 0
+                        ? "message.cozyrestaurant.bill.npc_too_little" : "message.cozyrestaurant.bill.npc_nothing").withStyle(ChatFormatting.YELLOW), true);
             } else if (earnings.isEmpty()) {
                 player.displayClientMessage(Component.translatable("message.cozyrestaurant.bill.abandoned").withStyle(ChatFormatting.YELLOW), true);
             } else {
