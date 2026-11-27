@@ -400,10 +400,10 @@ public class Stage5GameTests implements FabricGameTest {
         owner.teleportTo(inside.getX() + 0.5, inside.getY(), inside.getZ() + 0.5);
         tickManager(helper, cafe);
         long planned = cafe.getNextVisitAt() - helper.getLevel().getGameTime();
-        helper.assertTrue(planned >= 1200L, "staff back: the wait starts over from now, got " + planned);
+        helper.assertTrue(planned >= 600L, "staff back: the wait starts over from now, got " + planned);
         cafe.setNpcCustomers(false);
         level.setDayTime(dayTime);
-        helper.assertTrue(cafe.getSpawnIntervalTicks() == 4 * 1200L, "5 stars: a visit every 4 minutes");
+        helper.assertTrue(cafe.getSpawnIntervalTicks() == 2 * 1200L, "5 stars: a visit every 2 minutes");
         finish(helper, cafe, region, owner);
     }
 

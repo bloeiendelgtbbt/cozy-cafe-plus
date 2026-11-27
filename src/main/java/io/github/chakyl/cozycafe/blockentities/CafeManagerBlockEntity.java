@@ -55,7 +55,7 @@ public class CafeManagerBlockEntity extends BlockEntity implements MenuProvider 
      * NPC visits by the cafe's stars (index = stars; 0 counts as 1), fixed on purpose: minutes between visits,
      * the random spread around that (in percent) and the chance a second guest comes along.
      */
-    private static final int[] VISIT_MINUTES = {14, 14, 13, 10, 6, 4};
+    private static final int[] VISIT_MINUTES = {6, 6, 5, 4, 3, 2};
     private static final int[] VISIT_SPREAD_PERCENT = {0, 0, 5, 10, 30, 75};
     private static final int[] SECOND_GUEST_PERCENT = {5, 5, 10, 20, 60, 90};
     /** NPCs come between 7:00 and 21:00 (day time 0 is 6:00). */
